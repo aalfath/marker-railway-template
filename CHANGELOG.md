@@ -1,10 +1,10 @@
 # Changelog
+
 ## 2.2.0-2 (2026-11-16)
 
 Docs only, no change to the app or the image.
 
 - README: Deploy on Railway button for the published template (`marker`), and measured memory use.
-
 
 ## 2.2.0-1 (2026-11-16)
 
