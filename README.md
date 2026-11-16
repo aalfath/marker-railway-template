@@ -1,3 +1,5 @@
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/marker?utm_medium=integration&utm_source=button&utm_campaign=marker)
+
 # Marker on Railway
 
 This repo is the source of the **Marker** template on Railway. It runs [Marker](https://github.com/datalab-to/marker) by Datalab, which converts PDFs, images and Office documents (DOCX, PPTX, XLSX, EPUB, HTML) into Markdown, HTML, JSON or RAG-ready chunks. You get Marker's own web viewer and its REST API, protected by an API key.
