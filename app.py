@@ -55,18 +55,34 @@ async def require_api_key(request, call_next):
     )
 
 
-def _host() -> str:
-    if os.environ.get("HOST"):
-        return os.environ["HOST"]
-    try:  # Railway's private network is IPv6; "::" also accepts IPv4 here.
-        with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as s:
-            s.bind(("::", 0))
-        return "::"
-    except OSError:
-        return "0.0.0.0"
+def _listen_socket(port: int) -> socket.socket:
+    """Dual-stack listener: Railway's health check uses IPv4 and its private
+    network uses IPv6. uvicorn's own "::" bind goes through asyncio, which sets
+    IPV6_V6ONLY, so bind the socket here with it switched off."""
+    host = os.environ.get("HOST")
+    if not host:
+        try:
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+            sock.bind(("::", port))
+            return sock
+        except OSError:
+            host = "0.0.0.0"
+    family = socket.AF_INET6 if ":" in host else socket.AF_INET
+    sock = socket.socket(family, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind((host, port))
+    return sock
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
-    print(f"Marker server on port {port} (threads: {os.environ.get('OMP_NUM_THREADS')})", flush=True)
-    uvicorn.run(app, host=_host(), port=port, proxy_headers=True, forwarded_allow_ips="*")
+    sock = _listen_socket(port)
+    print(
+        f"Marker server listening on {sock.getsockname()[0]} port {port}"
+        f" (threads: {os.environ.get('OMP_NUM_THREADS')})",
+        flush=True,
+    )
+    config = uvicorn.Config(app, proxy_headers=True, forwarded_allow_ips="*")
+    uvicorn.Server(config).run(sockets=[sock])
