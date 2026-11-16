@@ -53,7 +53,7 @@ Other form fields: `page_range` (for example `0,5-10`), `mode` (`fast` or `no_oc
 
 ## Sizing
 
-Marker loads its ONNX models once at start. Idle, it uses about 1 GB of RAM. Give it a few vCPUs for faster conversions: the start script uses up to 8 threads.
+Marker loads its ONNX models once at start. In our tests it used about 0.4 GB of RAM idle and about 0.9 GB while converting a 15-page paper. Give it a few vCPUs for faster conversions: the start script uses up to 8 threads.
 
 ## Licensing
 
